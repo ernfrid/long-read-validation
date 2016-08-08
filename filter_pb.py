@@ -16,7 +16,7 @@ def check_intersect(hits):
             r_start = max(hit_1[2],hit_2[2])
             r_end = min(hit_1[3],hit_2[3])
 
-            if (l_end>=l_start) and (r_end>=r_end):
+            if (l_end>=l_start) and (r_end>=r_start):
                 intersects+=1
     return [len(hits),intersects]
 
@@ -76,8 +76,7 @@ for l in sys.stdin:
  
 r = check_intersect(pb_hits)
 if r[0] > 1 and r[1] > 0:
-    if r[0] > 1 and r[1] > 0:
-        for i in range(len(pb_hits)):
-            print '\t'.join(last)
+    for i in range(len(pb_hits)):
+        print '\t'.join(last)
 
 
