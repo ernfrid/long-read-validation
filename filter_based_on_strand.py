@@ -59,12 +59,12 @@ if __name__ == '__main__':
     strand_a_index = 8
     strand_b_index = 9
     
-    hit_in_onekg = LongReadIntersect()
+    hit_in_longread = LongReadIntersect()
 
     try:
         for line in sys.stdin:
             fields = line.rstrip().split('\t')
-            if hit_in_onekg(fields[type_index], fields[strand_a_index], fields[strand_b_index], fields[first_callset_index + strand_a_index], fields[first_callset_index + strand_b_index]):
+            if hit_in_longread(fields[type_index], fields[strand_a_index], fields[strand_b_index], fields[first_callset_index + strand_a_index], fields[first_callset_index + strand_b_index]):
                 print line,
     except ValueError as e:
         sys.exit(e)
