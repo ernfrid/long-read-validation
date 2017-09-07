@@ -1,7 +1,10 @@
 Long-read validation
 ====================
 
-Long-read validation of BEDPE structural variation
+Long-read validation of BEDPE structural variation. This follows the strategy
+utilized to evaluate the svtools pipeline. For the earlier strategy used in 
+[Layer _et al._](http://genomebiology.com/2014/15/6/R84), see the lumpy\_paper
+tag.
 
 ## Table of Contents
 1. [Quick start](#quick-start)
@@ -13,7 +16,7 @@ Dependencies: [bedtools](https://github.com/arq5x/bedtools2)
 
 Clone the git repository
 ```
-git clone git@github.com:hall-lab/long-read-validation.git
+git clone https://github.com:hall-lab/long-read-validation.git
 ```
 
 Download Illumina Moleculo and PacBio split reads from NA12878
