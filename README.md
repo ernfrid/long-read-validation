@@ -2,9 +2,9 @@ Long-read validation
 ====================
 
 Long-read validation of BEDPE structural variation. This follows the strategy
-utilized to evaluate the svtools pipeline. For the earlier strategy used in 
-[Layer _et al._](http://genomebiology.com/2014/15/6/R84), see the lumpy\_paper
-tag.
+utilized to evaluate the svtools pipeline. For code implementing the strategy in 
+[Layer _et al._](http://genomebiology.com/2014/15/6/R84), see the [lumpy\_paper
+tag](https://github.com/hall-lab/long-read-validation/releases/tag/lumpy_paper) .
 
 ## Table of Contents
 1. [Quick start](#quick-start)
@@ -37,14 +37,14 @@ longReadValidate \
     -i example/NA12878.sv.bedpe \
     -m NA12878.moleculo.splitreads.excldups.breakpoint.bedpe.gz \
     -p NA12878.pacbio.splitreads.excldups.breakpoint.bedpe.gz \
-    -s 5 \
+    -s 40 \
     > NA12878.sv.val.bedpe
 ```
 
-For [Layer _et al._](http://genomebiology.com/2014/15/6/R84) we required at least 1 Moleculo split read or at least 2
-PacBio split reads, with slop of 5.
+For the svtools paper, we required at least 1 Moleculo split read or at least 1
+PacBio split reads, with slop of 40.
 ```
-cat NA12878.sv.val.bedpe | awk '$(NF-1)>=1 || $NF>=2' | wc -l
+cat NA12878.sv.val.bedpe | awk '$(NF-1)>=1 || $NF>=1' | wc -l
 # 2508
 ```
 
@@ -80,26 +80,19 @@ pwd
 # /mnt/hall13_local/cc2qe/na12878_pacbio
 
 # a. Download the data
-~cc2qe/.aspera/connect/bin/ascp -i ~cc2qe/.aspera/connect/etc/asperaweb_id_dsa.putty -QTr -l 1000M anonftp@ftp-trace.ncbi.nlm.nih.gov:/1000genomes/ftp/technical/working/20131209_na12878_pacbio/Schadt/alignment/NA12878.pacbio_fr_MountSinai.bwa-sw.20140211.bam .
-~cc2qe/.aspera/connect/bin/ascp -i ~cc2qe/.aspera/connect/etc/asperaweb_id_dsa.putty -QTr -l 1000M anonftp@ftp-trace.ncbi.nlm.nih.gov:/1000genomes/ftp/technical/working/20131209_na12878_pacbio/Schadt/alignment/NA12878.pacbio_fr_MountSinai.bwa-sw.20140211.bam.bai .
+wget --no-host-directories -r --no-directories ftp://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/data/NA12878/NA12878_PacBio_MtSinai
 
-# b. Convert the bam file to fastq
-samtools view -F 256 -u NA12878.pacbio_fr_MountSinai.bwa-sw.20140211.readsort.bam | bamToFastq -i - -fq /dev/stdout | gzip -c > NA12878.pacbio_fr_MountSinai.bwa-sw.20140211.fq.gz
-
-# c. Align with pacbio (55.5 hours)
-time bwa-0.7.10 mem \
+# b. Align with pacbio (55.5 hours)
+bwa-0.7.12 mem \
     -x pacbio \
-    -t 24 \
+    -t 12 \
     -M \
     -R "@RG\tID:NA12878\tSM:NA12878" \
-    /shared/genomes/b37/full/human_g1k_v37.fasta \
-    NA12878.pacbio_fr_MountSinai.bwa-sw.20140211.fq.gz \
+    grch37-lite.fa \
+    \ corrected_reads_gt4kb.fasta \
     | samblaster -s splitters.sam \
-    | sambamba view -S -f bam /dev/stdin \
-    > NA12878.pacbio.realign.bam
-# real    3329m25.715s
-# user    76145m20.379s
-# sys     499m22.800s
+    | samtools view -b - \
+    > NA12878.pacbio.realign.bam && samtools index NA12878.pacbio.realign.bam
 
 # get stats on read length
 # coverage depth: 79219315761/2867459933 = 27.627
@@ -121,26 +114,20 @@ cat NA12878.pacbio.realign.bam.readlength.stats
 # stdev:        2763.47786754
 # variance: 7636809.92441
 
-# d. Convert the split reads to bedpe format
+# c. Convert the split reads to bedpe format
 # BAM file must be sorted by queryname
-# svtools commit: 73bd62d59deaecb03c0467e1031a02e31709a402
-time sambamba view -h -F "not duplicate" NA12878.pacbio.realign.bam \
-    | ~/code/svtools/splitReadSamToBedpe -i stdin \
+sambamba view -h -F "not duplicate" NA12878.pacbio.realign.bam \
+    | splitReadSamToBedpe -i stdin \
+    | bedtools sort \ 
     | gzip -c \
     > NA12878.pacbio.splitreads.excldups.bedpe.gz
-# real    210m17.002s
-# user    281m14.462s
-# sys     6m2.616s
 
-# e. Convert the split reads to breakpoint calls (slop of 0 on each side of break)
-time zcat NA12878.pacbio.splitreads.excldups.bedpe.gz \
-    | ~/code/svtools/splitterToBreakpoint -s 0 -i stdin -r 1000000 \
+# d. Convert the split reads to breakpoint calls (slop of 0 on each side of break)
+zcat NA12878.pacbio.splitreads.excldups.bedpe.gz \
+    | splitterToBreakpoint -s 0 -i stdin -r 1000000 \
     | awk '{ if ($2<0) $2=0; if ($4<0) $4=0; print }' OFS="\t" \
-    | awk '{ if ($1!=$4) { $18="DISTANT_INTER" } else { gsub("deletion","DEL",$18); gsub("duplication","DUP",$18); gsub("inversion","INV",$18); gsub("^local","LOCAL",$18); gsub("^distant","DISTANT",$18); } print }' OFS="\t" \
-    | gzip -c > slop0/NA12878.pacbio.splitreads.excldups.breakpoint.bedpe.gz
-# real    0m48.947s
-# user    1m41.482s
-# sys     0m2.929s
+    | awk '{ if ($1!=$4) { $18="INT" } else { gsub("deletion","DEL",$18); gsub("duplication","DUP",$18); gsub("inversion","INV",$18); gsub("^local_","",$18); gsub("^distant_","",$18); } print }' OFS="\t" \
+    | gzip -c > NA12878.pacbio.splitreads.excldups.breakpoint.bedpe.gz
 
 # ===============================================
 # 2. Moleculo
