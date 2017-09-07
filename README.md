@@ -4,7 +4,7 @@ Long-read validation
 Long-read validation of BEDPE structural variation. This follows the strategy
 utilized to evaluate the svtools pipeline. For code implementing the strategy in 
 [Layer _et al._](http://genomebiology.com/2014/15/6/R84), see the [lumpy\_paper
-tag](https://github.com/hall-lab/long-read-validation/releases/tag/lumpy_paper) .
+tag](https://github.com/hall-lab/long-read-validation/releases/tag/lumpy_paper).
 
 ## Table of Contents
 1. [Quick start](#quick-start)
@@ -99,20 +99,21 @@ bwa-0.7.12 mem \
 # (2867459933 is non-gapped genome size)
 sambamba view -F "not duplicate and not secondary_alignment"  NA12878.pacbio.realign.bam | awk '{ print length($10) }' | zstats > NA12878.pacbio.realign.bam.readlength.stats
 cat NA12878.pacbio.realign.bam.readlength.stats
-# num lines:    24850098
-# num unique:   25830
-# sum:      79219315761.0
-# arith. mean:  3187.88745867
-# geo. mean:    2252.60697049
-# min:      50.0
-# Q1:       1390.0
-# median:       2355.0
-# Q3:       4042.0
-# max:      40986.0
-# mode:     1628.0 (N=6850)
-# anti-mode:    40986.0 (N=1)
-# stdev:        2763.47786754
-# variance: 7636809.92441
+# num lines:	8967955
+# num unique:	21888
+# sum:		63351414347.0
+# arith. mean:	7064.19850981
+# geo. mean:	6603.24586163
+# min:		4001.0
+# Q1:		4926.0
+# median:		6230.0
+# Q3:		8355.0
+# max:		35521.0
+# mode:		4024.0 (N=2888)
+# anti-mode:	35521.0 (N=1)
+# stdev:		2853.70994913
+# variance:	8143660.47375
+# mad:		1533.0
 
 # c. Convert the split reads to bedpe format
 # BAM file must be sorted by queryname
