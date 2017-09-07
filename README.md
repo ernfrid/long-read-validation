@@ -89,7 +89,7 @@ bwa-0.7.12 mem \
     -M \
     -R "@RG\tID:NA12878\tSM:NA12878" \
     grch37-lite.fa \
-    \ corrected_reads_gt4kb.fasta \
+    \ NA12878_PacBio_MtSinai/corrected_reads_gt4kb.fasta \
     | samblaster -s splitters.sam \
     | samtools view -b - \
     > NA12878.pacbio.realign.bam && samtools index NA12878.pacbio.realign.bam
