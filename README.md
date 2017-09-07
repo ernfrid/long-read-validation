@@ -95,7 +95,7 @@ bwa-0.7.12 mem \
     > NA12878.pacbio.realign.bam && samtools index NA12878.pacbio.realign.bam
 
 # get stats on read length
-# coverage depth: 79219315761/2867459933 = 27.627
+# coverage depth: 63351414347/2867459933 = 22.0932169331902
 # (2867459933 is non-gapped genome size)
 sambamba view -F "not duplicate and not secondary_alignment"  NA12878.pacbio.realign.bam | awk '{ print length($10) }' | zstats > NA12878.pacbio.realign.bam.readlength.stats
 cat NA12878.pacbio.realign.bam.readlength.stats
@@ -169,7 +169,7 @@ sambamba view -h -F "not duplicate" NA12878.moleculo.bwa-mem.20140110.readsort.b
 # d. Convert to breakpoint calls (slop of 0 on each side of break)
 mkdir -p slop0
 zcat NA12878.moleculo.splitreads.excldups.bedpe.gz \
-    | ~/code/svtools/splitterToBreakpoint -s 0 -i stdin -r 1000000 \
+    | splitterToBreakpoint -s 0 -i stdin -r 1000000 \
     | awk '{ if ($2<0) $2=0; if ($4<0) $4=0; print }' OFS="\t" \
     | awk '{ if ($1!=$4) { $18="DISTANT_INTER" } else { gsub("deletion","DEL",$18); gsub("duplication","DUP",$18); gsub("inversion","INV",$18); gsub("^local","LOCAL",$18); gsub("^distant","DISTANT",$18); } print }' OFS="\t" \
     | bgzip -c \
