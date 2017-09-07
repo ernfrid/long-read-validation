@@ -16,7 +16,7 @@ Dependencies: [bedtools](https://github.com/arq5x/bedtools2)
 
 Clone the git repository
 ```
-git clone https://github.com:hall-lab/long-read-validation.git
+git clone https://github.com/hall-lab/long-read-validation.git
 ```
 
 Download Illumina Moleculo and PacBio split reads from NA12878
